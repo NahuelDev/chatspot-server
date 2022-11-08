@@ -77,6 +77,11 @@ app.use(express.json());
 app.use("/api/token", tokenRouter);
 app.use("/api/rooms", roomsRouter);
 
+app.get('/', (req, res) => {
+    console.log('/ PATH');
+    res.end();
+})
+
 server.listen(PORT, () => {
     console.log(`Server UP! :^) at port: ${PORT}`);
 })
