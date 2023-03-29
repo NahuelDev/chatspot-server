@@ -7,6 +7,7 @@ import tokenRouter from './routers/tokenRouter.js';
 import roomsRouter from './routers/roomsRouter.js';
 import { addUser } from './user.js';
 import { addRoom, rooms } from './room.js';
+import { randomUUID } from 'crypto';
 
 
 dotenv.config();
@@ -42,9 +43,18 @@ io.on("connection", (socket) => {
         socket.leave(oldRoom);
         socket.join(room.id);
 
-        socket.broadcast
-            .to(user.room)
-            .emit("message", { user: "Admin", text: `${user.username} has joined!` });
+        socket.broadcast.to(oldRoom).emit("message", {
+            user: "Admin",
+            text: `${user.username} has left!`,
+            id: randomUUID()
+        })
+
+        socket.broadcast.to(room.id)
+            .emit("message", {
+                user: "Admin",
+                text: `${user.username} has joined!`,
+                id: randomUUID()
+            });
 
         // Set room 
         socket.emit("setRoom", room);
@@ -56,14 +66,17 @@ io.on("connection", (socket) => {
         socket.emit("message", {
             user: "Admin",
             text: `Welcome to ${room.name} - ${room.album}`,
+            id: randomUUID()
         });
 
     });
 
-    socket.on("sendMessage", ({ message, username, roomID }) => {
+    socket.on("sendMessage", ({ message, username, profileImage, roomID }) => {
         io.to(roomID).emit("message", {
             user: username,
-            text: message
+            text: message,
+            profileImage,
+            id: randomUUID()
         });
     });
 
